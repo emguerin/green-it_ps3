@@ -8,7 +8,7 @@ uint8_t radioBuf(T2_MESSAGE_HEADERS_LEN + T2_MESSAGE_MAX_DATA_LEN);
 uint8_t mySerialNumber = 6;
 uint8_t idNode;
 uint8_t idNetwork;
-uint16_t idChannel;
+int idChannel;
 
 void initialisation() {
   LoRa.setPins(10,7,2);
@@ -77,6 +77,10 @@ int sendGiveMeAChannelAndField() {
   return sendLORA(idNetwork, idNode, 0x01,0x02, 0x00, buf, 0x00);
 }
 
+int sendValue(const char* val) {
+  return sendLORA(idNetwork, idNode, 0x01,0x03, 0x01, val, 3);
+}
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -123,7 +127,9 @@ void setup() {
 
     if (myMsg.src == 0x01 && myMsg.sdx == 0x02 && myMsg.cmd == 0x01 && myMsg.dst == idNode && myMsg.idx == idNetwork) {
       // parsing message 
-      idChannel = atoi(strtok((char*)myMsg.data, ";"));
+      char * idChannelStr = strtok((char*)myMsg.data, ";");
+      Serial.println(idChannelStr);
+      idChannel = atoi(idChannelStr);
       Serial.println(idChannel);
       Serial.println(atoi(strtok(NULL, ";")));
 
@@ -132,6 +138,8 @@ void setup() {
   }  
   Serial.println("Bonjour, je suis la reponse à la demande de channel.\n");
   myMsg.printMessage();
+
+  sendValue("25;");
 }
 
 void loop() {
